@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>품질관리 대시보드</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- 헤더 -->
+        <div class="header">
+            <h1>🏗️ 건설현장 품질관리 대시보드</h1>
+            <div class="header-info">
+                <div class="datetime" id="currentDateTime"></div>
+                <div class="weather-info">
+                    <img src="icons/weather.png" alt="날씨" class="weather-icon" id="weatherIcon">
+                    <span id="weatherText">맑음, 23°C</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 대시보드 그리드 -->
+        <div class="dashboard-grid">
+            <!-- 현장 현황 -->
+            <div class="card">
+                <h3>
+                    <img src="icons/site.png" alt="현장" class="card-icon">
+                    금일 현장 현황
+                </h3>
+                <div class="site-grid" id="siteGrid"></div>
+            </div>
+
+            <!-- 품질관리자 배치기준 현황 -->
+            <div class="card">
+                <h3>
+                    <img src="icons/manager.png" alt="관리자" class="card-icon">
+                    품질관리자 배치기준 현황
+                </h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-number">15</div>
+                        <div class="stat-label">총 현장</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">12</div>
+                        <div class="stat-label">배치 완료</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">3</div>
+                        <div class="stat-label">배치 필요</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">80%</div>
+                        <div class="stat-label">배치율</div>
+                    </div>
+                </div>
+                <button class="btn" id="deploymentBtn">
+                    <img src="icons/criteria.png" alt="기준" class="btn-icon">
+                    배치 기준 확인
+                </button>
+            </div>
+
+            <!-- 현장 품질등급 현황 -->
+            <div class="card">
+                <h3>
+                    <img src="icons/grade.png" alt="등급" class="card-icon">
+                    현장 품질등급 현황
+                </h3>
+                <div class="circular-chart-container">
+                    <div class="circular-chart-wrapper">
+                        <canvas id="gradeChart"></canvas>
+                    </div>
+                    <div class="circular-chart-legend" id="gradeLegend"></div>
+                </div>
+            </div>
+
+            <!-- 품질검사 결과 -->
+            <div class="card">
+                <h3>
+                    <img src="icons/inspection.png" alt="검사" class="card-icon">
+                    품질검사 결과
+                </h3>
+                <div class="chart-container">
+                    <canvas id="inspectionChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 품질관리 주요 구조물 및 자재 현황 -->
+            <div class="card">
+                <h3>
+                    <img src="icons/structure.png" alt="구조물" class="card-icon">
+                    품질관리 주요 구조물 현황
+                </h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>구조물</th>
+                            <th>검사 완료</th>
+                            <th>검사 대기</th>
+                            <th>불합격</th>
+                        </tr>
+                    </thead>
+                    <tbody id="structureTableBody"></tbody>
+                </table>
+                
+                <!-- 자재 현황 테이블 추가 -->
+                <h3 style="margin-top: 30px; margin-bottom: 15px;">
+                    <img src="icons/material.png" alt="자재" class="card-icon">
+                    품질관리 주요 자재 현황
+                </h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>자재</th>
+                            <th>검사 완료</th>
+                            <th>검사 대기</th>
+                            <th>불합격</th>
+                        </tr>
+                    </thead>
+                    <tbody id="materialTableBody"></tbody>
+                </table>
+            </div>
+
+            <!-- 품질관리 도우미 -->
+            <div class="card">
+                <h3>
+                    <img src="icons/assistant.png" alt="도우미" class="card-icon">
+                    품질관리 도우미
+                </h3>
+                <div class="chatbot-container">
+                    <div class="chatbot-messages" id="chatbotMessages">
+                        <div class="message bot">
+                            <div class="message-content">
+                                안녕하세요! 품질관리 관련 질문이 있으시면 언제든 물어보세요. 😊
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chatbot-input-container">
+                        <input type="text" class="chatbot-input" id="chatbotInput" placeholder="질문을 입력하세요...">
+                        <button class="chatbot-send" id="chatbotSend">▶</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 모달들 -->
+    <!-- 배치기준 모달 -->
+    <div id="deploymentModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>품질관리자 배치기준</h2>
+            <div class="form-group">
+                <label>공사비 기준:</label>
+                <p>• 30억 이상: 품질관리자 1명 이상 배치</p>
+                <p>• 100억 이상: 품질관리자 2명 이상 배치</p>
+                <p>• 300억 이상: 품질관리자 3명 이상 배치</p>
+            </div>
+            <div class="form-group">
+                <label>자격 요건:</label>
+                <p>• 건설기술자 자격 보유</p>
+                <p>• 품질관리 경력 3년 이상</p>
+                <p>• 해당 공종 전문성 보유</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 문자발송 모달 -->
+    <div id="smsModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>문자 발송</h2>
+            <div class="form-group">
+                <label for="smsRecipient">수신자:</label>
+                <select id="smsRecipient">
+                    <option value="all">전체 현장관리자</option>
+                    <option value="incomplete">배치미완료 현장</option>
+                    <option value="custom">직접 선택</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="smsMessage">메시지:</label>
+                <textarea id="smsMessage" rows="4" placeholder="메시지를 입력하세요..."></textarea>
+            </div>
+            <button class="btn" id="sendSmsBtn">발송하기</button>
+        </div>
+    </div>
+
+    <script src="js/data.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/modals.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
